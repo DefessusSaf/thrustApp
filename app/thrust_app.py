@@ -104,7 +104,16 @@ def calculate_additional(time, thrust):
         return None, None
     max_thrust = np.max(thrust)
     idx_max = np.argmax(thrust)
-    time_max = time[idx_max]
+    
+    # We calculate the period of zero traction (the first non -zero index)
+    non_zero_indices = np.where(thrust > 0)[0]
+    if len(non_zero_indices) > 0:
+        zero_thrust_period = time[non_zero_indices[0]]
+    else:
+        zero_thrust_period = 0
+    
+    # Correct the maximum traction time
+    time_max = time[idx_max] - zero_thrust_period
     return max_thrust, time_max
 
 def plot_thrust_and_pressure(time, thrust, pressure, total_impulse, avg_pressure, save_dir=None, base_filename=""):
