@@ -1,5 +1,5 @@
 """
-autor: Saf
+author: Saf
 gitnub: https://github.com/DefessusSaf
 
 """
