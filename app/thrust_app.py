@@ -26,7 +26,7 @@ class ScrollableFrame(tk.Frame):
         self.scrollable_frame = tk.Frame(self.canvas)
         self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         
-        # При изменении размера внутреннего фрейма обновляем область прокрутки
+        # When changing the size of the internal frame, we update the scroll area
         self.scrollable_frame.bind(
             "<Configure>",
             lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -100,10 +100,6 @@ def estimate_pressure(thrust, P_max, F_max):
     return P_max * (thrust / F_max) ** 0.8
 
 def calculate_additional(time, thrust):
-    """
-    Дополнительные расчёты:
-    - Максимальная тяга и время, когда она достигается.
-    """
     if thrust.size == 0:
         return None, None
     max_thrust = np.max(thrust)
@@ -121,10 +117,10 @@ def plot_thrust_and_pressure(time, thrust, pressure, total_impulse, avg_pressure
     total_impulse_ns = total_impulse * 9.80665
     avg_pressure_pa = avg_pressure * 1e5 if avg_pressure is not None else None
 
-    # Создаём одну фигуру с двумя подграфиками
+    # We create one figure with two subscriptions
     fig, (ax_thrust, ax_pressure) = plt.subplots(nrows=1, ncols=2, figsize=(12, 6))
 
-    # --- График тяги ---
+# ---The grave schedule ---    
     ax_thrust.plot(time, thrust, "b-", linewidth=2)
     ax_thrust.axvline(x=time[0], color="r", linestyle="--", linewidth=1.0)
     ax_thrust.axvline(x=time[-1], color="r", linestyle="--", linewidth=1.0)
@@ -141,7 +137,7 @@ def plot_thrust_and_pressure(time, thrust, pressure, total_impulse, avg_pressure
                    horizontalalignment="right",
                    bbox=dict(facecolor="white", edgecolor="gray", alpha=0.8, boxstyle="round,pad=0.5"))
 
-    # --- График давления ---
+ # ---Pressure schedule ---
     if pressure is not None:
         ax_pressure.plot(time, pressure, "r-", linewidth=2)
         ax_pressure.axvline(x=time[0], color="b", linestyle="--", linewidth=1.0)
@@ -174,18 +170,18 @@ class ThrustApp(tk.Tk):
         super().__init__()
         self.title("Анализ Тяги РДТТ")
         
-        # Переменные для настроек
-        self.input_mode = tk.StringVar(value="file")   # Один файл или папка
-        self.range_mode = tk.StringVar(value="manual")   # Ручной ввод или автопоиск
+        # Variables for settings
+        self.input_mode = tk.StringVar(value="file")   # One file or folder
+        self.range_mode = tk.StringVar(value="manual")   # Manual input or autos
 
-        # Создадим прокручиваемый контейнер для всего интерфейса
+        # Create a scrolling container for the entire interface
         container = tk.Frame(self)
         container.pack(fill="both", expand=True)
         scroll_frame = ScrollableFrame(container)
         scroll_frame.pack(fill="both", expand=True)
         self.main_frame = scroll_frame.scrollable_frame
         
-        # ---------- Верхняя часть интерфейса: выбор настроек ----------
+        # ---------- The upper part of the interface: selection of settings ----------
         frame_source = tk.LabelFrame(self.main_frame, text="Источник данных")
         frame_source.pack(fill="x", padx=5, pady=5)
         tk.Radiobutton(frame_source, text="Один файл",
@@ -216,7 +212,7 @@ class ThrustApp(tk.Tk):
         self.output_browse_button = tk.Button(frame_output, text="Обзор", command=self.browse_output)
         self.output_browse_button.pack(side="left", padx=5)
         
-        # Фрейм ручного ввода диапазонов
+        # Frame of manual input of ranges
         self.frame_manual = tk.LabelFrame(self.main_frame, text="Ручной ввод диапазонов (формат: A1:A100)")
         self.frame_manual.pack(fill="x", padx=5, pady=5)
         tk.Label(self.frame_manual, text="Время: ").grid(row=0, column=0, padx=5, pady=2, sticky="e")
@@ -229,7 +225,7 @@ class ThrustApp(tk.Tk):
         self.pressure_range_entry = tk.Entry(self.frame_manual, width=15)
         self.pressure_range_entry.grid(row=0, column=5, padx=5, pady=2)
         
-        # Фрейм автопоиска диапазона
+        # Frame Auto -Sopos Range
         self.frame_auto = tk.LabelFrame(self.main_frame, text="Автопоиск диапазона")
         self.frame_auto.pack(fill="x", padx=5, pady=5)
         tk.Label(self.frame_auto, text="Номер начальной строки: ").grid(row=0, column=0, padx=5, pady=2, sticky="e")
@@ -242,14 +238,14 @@ class ThrustApp(tk.Tk):
         self.start_col_entry = tk.Entry(self.frame_auto, width=5)
         self.start_col_entry.grid(row=0, column=5, padx=5, pady=2)
         
-        # Фрейм для ввода массы топлива
+        # Frame for entering fuel mass
         frame_fuel = tk.Frame(self.main_frame)
         frame_fuel.pack(fill="x", padx=5, pady=5)
         tk.Label(frame_fuel, text="Масса топлива (кг, опционально): ").pack(side="left", padx=5)
         self.fuel_mass_entry = tk.Entry(frame_fuel, width=10)
         self.fuel_mass_entry.pack(side="left", padx=5)
         
-        # Фрейм с кнопками
+        #Frame with buttons
         frame_buttons = tk.Frame(self.main_frame)
         frame_buttons.pack(fill="x", padx=5, pady=5)
         self.process_button = tk.Button(frame_buttons, text="Запустить обработку", command=self.process)
@@ -257,11 +253,11 @@ class ThrustApp(tk.Tk):
         self.copy_button = tk.Button(frame_buttons, text="Копировать результаты", command=self.copy_results)
         self.copy_button.pack(side="left", padx=5)
         
-        # ---------- Нижняя часть: окно ScrolledText для вывода результатов ----------
+        # ---------- Lower part: SCROLLLEDTEXT window for output of results ----------
         self.results_text = scrolledtext.ScrolledText(self.main_frame, wrap=tk.WORD, height=10)
         self.results_text.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Добавляем биндинг для Ctrl + C (копирование выделенного)
+        # Add binding for Ctrl + C (copying dedicated)
         self.results_text.bind("<Control-c>", self.copy_selection)
 
         self.range_mode.trace("w", self.toggle_range_frames)
@@ -307,7 +303,7 @@ class ThrustApp(tk.Tk):
             self.clipboard_clear()
             self.clipboard_append(selected_text)
         except tk.TclError:
-            # Ничего не выделено
+            # Nothing is highlighted
             pass
         return "break"
 
